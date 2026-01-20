@@ -1,19 +1,76 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="utf-8" />
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
-    <meta name="description" content="Full Stack E-Commerce Platform" />
+    <meta name="theme-color" content="#3a86ff" />
+    <meta name="description" content="NexusShop - Premium E-commerce Platform with React & Node.js" />
     
-    <!-- Add FontAwesome CDN -->
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="NexusShop | Premium E-commerce" />
+    <meta property="og:description" content="Full-stack e-commerce platform with blue-purple gradient design" />
+    <meta property="og:image" content="%PUBLIC_URL%/og-image.png" />
+    <meta property="og:url" content="https://nexusshop.netlify.app" />
+    <meta property="og:type" content="website" />
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="NexusShop | Premium E-commerce" />
+    <meta name="twitter:description" content="Full-stack e-commerce platform with blue-purple gradient design" />
+    <meta name="twitter:image" content="%PUBLIC_URL%/og-image.png" />
+    
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    
+    <!-- Load environment configuration -->
+    <script src="%PUBLIC_URL%/env.js"></script>
+    
+    <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     
-    <title>NexusShop | Full-Stack E-Commerce</title>
-  </head>
-  <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <title>NexusShop | Premium E-commerce</title>
+</head>
+<body>
+    <noscript>
+        <div style="
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #3a86ff, #7209b7);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+            z-index: 9999;
+        ">
+            <div>
+                <h1 style="font-size: 2rem; margin-bottom: 1rem;">JavaScript Required</h1>
+                <p style="font-size: 1.2rem; margin-bottom: 2rem;">
+                    NexusShop requires JavaScript to run. Please enable JavaScript in your browser settings.
+                </p>
+                <button onclick="location.reload()" style="
+                    background: white;
+                    color: #3a86ff;
+                    border: none;
+                    padding: 12px 24px;
+                    border-radius: 50px;
+                    font-size: 1.1rem;
+                    font-weight: 600;
+                    cursor: pointer;
+                ">
+                    Reload Page
+                </button>
+            </div>
+        </div>
+    </noscript>
     <div id="root"></div>
-  </body>
+</body>
 </html>

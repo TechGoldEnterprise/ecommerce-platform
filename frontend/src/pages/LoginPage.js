@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
 import { useDispatch } from 'react-redux';
 import { login } from '../features/auth/authSlice';
+import { userAPI } from '../services/api'; // Import from our new API service
 
 const LoginPage = () => {
   const [loading, setLoading] = useState(false);
@@ -14,32 +15,77 @@ const LoginPage = () => {
   const onSubmit = async (data) => {
     setLoading(true);
     try {
-      // Get users from localStorage
-      const users = JSON.parse(localStorage.getItem('nexusUsers') || '[]');
-      const user = users.find(user => 
-        user.email === data.email && user.password === data.password
-      );
-      
-      if (!user) {
-        toast.error('Invalid email or password');
-        setLoading(false);
-        return;
+      // For development: fallback to localStorage if backend not available
+      if (process.env.NODE_ENV === 'development' && !process.env.REACT_APP_API_URL) {
+        // Get users from localStorage
+        const users = JSON.parse(localStorage.getItem('nexusUsers') || '[]');
+        const user = users.find(user => 
+          user.email === data.email && user.password === data.password
+        );
+        
+        if (!user) {
+          toast.error('Invalid email or password');
+          setLoading(false);
+          return;
+        }
+        
+        // Remove password from user object before storing
+        const { password, ...userWithoutPassword } = user;
+        
+        // Dispatch login action
+        dispatch(login(userWithoutPassword));
+        
+        // Store in localStorage
+        localStorage.setItem('nexusCurrentUser', JSON.stringify(userWithoutPassword));
+        localStorage.setItem('token', 'demo-token-' + Date.now()); // Demo token
+        
+        toast.success('Login successful!');
+        navigate('/');
+      } else {
+        // Production: Use actual API
+        console.log('Logging in with API:', `${process.env.REACT_APP_API_URL}/api/users/login`);
+        
+        const response = await userAPI.login(data);
+        const { token, user } = response.data;
+        
+        // Store token and user data
+        localStorage.setItem('token', token);
+        localStorage.setItem('nexusCurrentUser', JSON.stringify(user));
+        
+        // Dispatch login action
+        dispatch(login({ user, token }));
+        
+        toast.success('Login successful!');
+        navigate('/');
       }
-      
-      // Remove password from user object before storing
-      const { password, ...userWithoutPassword } = user;
-      
-      // Dispatch login action (we'll create this slice next)
-      dispatch(login(userWithoutPassword));
-      
-      // Store in localStorage
-      localStorage.setItem('nexusCurrentUser', JSON.stringify(userWithoutPassword));
-      
-      toast.success('Login successful!');
-      navigate('/');
     } catch (error) {
-      toast.error('Login failed. Please try again.');
       console.error('Login error:', error);
+      
+      // Show appropriate error message
+      if (error.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else if (error.code === 'ERR_NETWORK') {
+        toast.error('Cannot connect to server. Trying demo login...');
+        
+        // Fallback to localStorage demo users
+        const users = JSON.parse(localStorage.getItem('nexusUsers') || '[]');
+        const user = users.find(user => 
+          user.email === data.email && user.password === data.password
+        );
+        
+        if (user) {
+          const { password, ...userWithoutPassword } = user;
+          dispatch(login(userWithoutPassword));
+          localStorage.setItem('nexusCurrentUser', JSON.stringify(userWithoutPassword));
+          localStorage.setItem('token', 'demo-token-' + Date.now());
+          toast.success('Logged in locally (demo mode)');
+          navigate('/');
+        } else {
+          toast.error('Invalid credentials in demo mode');
+        }
+      } else {
+        toast.error('Login failed. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -118,7 +164,7 @@ const LoginPage = () => {
                 outline: 'none'
               }}
               placeholder="Enter your email"
-              defaultValue="customer@example.com"
+              defaultValue={process.env.NODE_ENV === 'development' ? "customer@example.com" : ""}
             />
             {errors.email && (
               <p style={{ color: '#e63946', marginTop: '0.5rem', fontSize: '0.9rem' }}>
@@ -150,7 +196,7 @@ const LoginPage = () => {
                 outline: 'none'
               }}
               placeholder="Enter your password"
-              defaultValue="password123"
+              defaultValue={process.env.NODE_ENV === 'development' ? "password123" : ""}
             />
             {errors.password && (
               <p style={{ color: '#e63946', marginTop: '0.5rem', fontSize: '0.9rem' }}>
@@ -247,24 +293,26 @@ const LoginPage = () => {
             </p>
           </div>
 
-          {/* Demo credentials */}
-          <div style={{
-            marginTop: '1.5rem',
-            padding: '1rem',
-            background: 'rgba(58, 134, 255, 0.05)',
-            borderRadius: '8px',
-            fontSize: '0.85rem',
-            color: '#555'
-          }}>
-            <p style={{ margin: '0 0 0.5rem 0', fontWeight: '500' }}>
-              <i className="fas fa-info-circle" style={{ marginRight: '5px' }}></i>
-              Demo Credentials:
-            </p>
-            <p style={{ margin: '0' }}>
-              <strong>Email:</strong> customer@example.com<br />
-              <strong>Password:</strong> password123
-            </p>
-          </div>
+          {/* Demo credentials - only show in development */}
+          {process.env.NODE_ENV === 'development' && (
+            <div style={{
+              marginTop: '1.5rem',
+              padding: '1rem',
+              background: 'rgba(58, 134, 255, 0.05)',
+              borderRadius: '8px',
+              fontSize: '0.85rem',
+              color: '#555'
+            }}>
+              <p style={{ margin: '0 0 0.5rem 0', fontWeight: '500' }}>
+                <i className="fas fa-info-circle" style={{ marginRight: '5px' }}></i>
+                Demo Credentials (Local Storage):
+              </p>
+              <p style={{ margin: '0' }}>
+                <strong>Email:</strong> customer@example.com<br />
+                <strong>Password:</strong> password123
+              </p>
+            </div>
+          )}
         </form>
 
         <style>{`

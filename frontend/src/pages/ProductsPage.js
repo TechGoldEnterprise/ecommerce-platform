@@ -1,92 +1,200 @@
 import React, { useState, useEffect } from 'react';
 import ProductCard from '../components/ProductCard';
+import { productAPI } from '../services/api';
 
 const ProductsPage = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Enhanced mock data with blue-purple theme products
-    const mockProducts = [
-      {
-        _id: '1',
-        name: 'Wireless Bluetooth Headphones',
-        description: 'Premium noise-cancelling headphones with deep blue LED accents',
-        price: 249.99,
-        category: 'Electronics',
-        stock: 25,
-        images: ['https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?w=600&h=400&fit=crop'],
-        rating: 4.7,
-        featured: true,
-        colors: ['#3a86ff', '#4361ee']
-      },
-      {
-        _id: '2',
-        name: 'Smart Fitness Watch',
-        description: 'Track your fitness with this gradient blue-purple smartwatch',
-        price: 299.99,
-        category: 'Electronics',
-        stock: 15,
-        images: ['https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&h=400&fit=crop'],
-        rating: 4.5,
-        featured: true,
-        colors: ['#7209b7', '#560bad']
-      },
-      {
-        _id: '3',
-        name: 'Gaming Keyboard RGB',
-        description: 'Mechanical keyboard with customizable blue-purple RGB lighting',
-        price: 129.99,
-        category: 'Electronics',
-        stock: 30,
-        images: ['https://images.unsplash.com/photo-1541140532154-b024d705b90a?w=600&h=400&fit=crop'],
-        rating: 4.8,
-        featured: true,
-        colors: ['#4cc9f0', '#4361ee']
-      },
-      {
-        _id: '4',
-        name: 'Waterproof Backpack',
-        description: 'Durable backpack with gradient blue design, perfect for travel',
-        price: 89.99,
-        category: 'Fashion',
-        stock: 40,
-        images: ['https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=600&h=400&fit=crop'],
-        rating: 4.4,
-        featured: true,
-        colors: ['#3a86ff', '#4cc9f0']
-      },
-      {
-        _id: '5',
-        name: 'Smartphone 256GB',
-        description: 'Latest smartphone with vibrant purple finish',
-        price: 899.99,
-        category: 'Electronics',
-        stock: 12,
-        images: ['https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=600&h=400&fit=crop'],
-        rating: 4.9,
-        featured: true,
-        colors: ['#7209b7', '#3a0ca3']
-      },
-      {
-        _id: '6',
-        name: 'Noise Cancelling Earbuds',
-        description: 'True wireless earbuds with deep blue charging case',
-        price: 179.99,
-        category: 'Electronics',
-        stock: 22,
-        images: ['https://images.unsplash.com/photo-1590658165737-15a047b8b5e5?w=600&h=400&fit=crop'],
-        rating: 4.6,
-        featured: true,
-        colors: ['#4361ee', '#4cc9f0']
-      }
-    ];
-    
-    setTimeout(() => {
-      setProducts(mockProducts);
-      setLoading(false);
-    }, 500);
+    fetchProducts();
   }, []);
+
+  const fetchProducts = async () => {
+    try {
+      // Check if we're in development mode without backend
+      const isDemoMode = process.env.NODE_ENV === 'development' && !process.env.REACT_APP_API_URL;
+      
+      if (isDemoMode) {
+        // Use mock data for development/demo
+        console.log('Running in demo mode - using mock data');
+        setTimeout(() => {
+          const mockProducts = [
+            {
+              _id: '1',
+              name: 'Wireless Bluetooth Headphones',
+              description: 'Premium noise-cancelling headphones with deep blue LED accents',
+              price: 249.99,
+              category: 'Electronics',
+              stock: 25,
+              images: ['https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?w=600&h=400&fit=crop'],
+              rating: 4.7,
+              featured: true,
+              colors: ['#3a86ff', '#4361ee']
+            },
+            {
+              _id: '2',
+              name: 'Smart Fitness Watch',
+              description: 'Track your fitness with this gradient blue-purple smartwatch',
+              price: 299.99,
+              category: 'Electronics',
+              stock: 15,
+              images: ['https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&h=400&fit=crop'],
+              rating: 4.5,
+              featured: true,
+              colors: ['#7209b7', '#560bad']
+            },
+            {
+              _id: '3',
+              name: 'Gaming Keyboard RGB',
+              description: 'Mechanical keyboard with customizable blue-purple RGB lighting',
+              price: 129.99,
+              category: 'Electronics',
+              stock: 30,
+              images: ['https://images.unsplash.com/photo-1541140532154-b024d705b90a?w=600&h=400&fit=crop'],
+              rating: 4.8,
+              featured: true,
+              colors: ['#4cc9f0', '#4361ee']
+            },
+            {
+              _id: '4',
+              name: 'Waterproof Backpack',
+              description: 'Durable backpack with gradient blue design, perfect for travel',
+              price: 89.99,
+              category: 'Fashion',
+              stock: 40,
+              images: ['https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=600&h=400&fit=crop'],
+              rating: 4.4,
+              featured: true,
+              colors: ['#3a86ff', '#4cc9f0']
+            },
+            {
+              _id: '5',
+              name: 'Smartphone 256GB',
+              description: 'Latest smartphone with vibrant purple finish',
+              price: 899.99,
+              category: 'Electronics',
+              stock: 12,
+              images: ['https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=600&h=400&fit=crop'],
+              rating: 4.9,
+              featured: true,
+              colors: ['#7209b7', '#3a0ca3']
+            },
+            {
+              _id: '6',
+              name: 'Noise Cancelling Earbuds',
+              description: 'True wireless earbuds with deep blue charging case',
+              price: 179.99,
+              category: 'Electronics',
+              stock: 22,
+              images: ['https://images.unsplash.com/photo-1590658165737-15a047b8b5e5?w=600&h=400&fit=crop'],
+              rating: 4.6,
+              featured: true,
+              colors: ['#4361ee', '#4cc9f0']
+            }
+          ];
+          setProducts(mockProducts);
+          setLoading(false);
+        }, 500);
+      } else {
+        // Production: Use actual API
+        console.log('Fetching products from API:', process.env.REACT_APP_API_URL);
+        const response = await productAPI.getAll();
+        
+        if (response.data && Array.isArray(response.data.products || response.data)) {
+          setProducts(response.data.products || response.data);
+        } else {
+          console.error('Invalid API response format:', response.data);
+          // Fallback to mock data if API response is invalid
+          throw new Error('Invalid API response format');
+        }
+        setLoading(false);
+        setError(null);
+      }
+    } catch (err) {
+      console.error('Error fetching products:', err);
+      setError('Failed to load products. Using demo data instead.');
+      setLoading(false);
+      
+      // Fallback to mock data
+      const mockProducts = [
+        {
+          _id: '1',
+          name: 'Wireless Bluetooth Headphones',
+          description: 'Premium noise-cancelling headphones with deep blue LED accents',
+          price: 249.99,
+          category: 'Electronics',
+          stock: 25,
+          images: ['https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?w=600&h=400&fit=crop'],
+          rating: 4.7,
+          featured: true,
+          colors: ['#3a86ff', '#4361ee']
+        },
+        {
+          _id: '2',
+          name: 'Smart Fitness Watch',
+          description: 'Track your fitness with this gradient blue-purple smartwatch',
+          price: 299.99,
+          category: 'Electronics',
+          stock: 15,
+          images: ['https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&h=400&fit=crop'],
+          rating: 4.5,
+          featured: true,
+          colors: ['#7209b7', '#560bad']
+        },
+        {
+          _id: '3',
+          name: 'Gaming Keyboard RGB',
+          description: 'Mechanical keyboard with customizable blue-purple RGB lighting',
+          price: 129.99,
+          category: 'Electronics',
+          stock: 30,
+          images: ['https://images.unsplash.com/photo-1541140532154-b024d705b90a?w=600&h=400&fit=crop'],
+          rating: 4.8,
+          featured: true,
+          colors: ['#4cc9f0', '#4361ee']
+        },
+        {
+          _id: '4',
+          name: 'Waterproof Backpack',
+          description: 'Durable backpack with gradient blue design, perfect for travel',
+          price: 89.99,
+          category: 'Fashion',
+          stock: 40,
+          images: ['https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=600&h=400&fit=crop'],
+          rating: 4.4,
+          featured: true,
+          colors: ['#3a86ff', '#4cc9f0']
+        },
+        {
+          _id: '5',
+          name: 'Smartphone 256GB',
+          description: 'Latest smartphone with vibrant purple finish',
+          price: 899.99,
+          category: 'Electronics',
+          stock: 12,
+          images: ['https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=600&h=400&fit=crop'],
+          rating: 4.9,
+          featured: true,
+          colors: ['#7209b7', '#3a0ca3']
+        },
+        {
+          _id: '6',
+          name: 'Noise Cancelling Earbuds',
+          description: 'True wireless earbuds with deep blue charging case',
+          price: 179.99,
+          category: 'Electronics',
+          stock: 22,
+          images: ['https://images.unsplash.com/photo-1590658165737-15a047b8b5e5?w=600&h=400&fit=crop'],
+          rating: 4.6,
+          featured: true,
+          colors: ['#4361ee', '#4cc9f0']
+        }
+      ];
+      setProducts(mockProducts);
+    }
+  };
 
   if (loading) {
     return (
@@ -112,12 +220,36 @@ const ProductsPage = () => {
           WebkitTextFillColor: 'transparent',
           fontWeight: 'bold'
         }}>Loading Products...</h2>
+        <p style={{ color: '#666', marginTop: '10px' }}>
+          {process.env.REACT_APP_API_URL 
+            ? `Connecting to: ${process.env.REACT_APP_API_URL}`
+            : 'Using demo data'
+          }
+        </p>
       </div>
     );
   }
 
   return (
     <div className="home-page">
+      {error && (
+        <div style={{
+          background: 'linear-gradient(135deg, #ff6b6b, #e63946)',
+          color: 'white',
+          padding: '1rem',
+          borderRadius: '10px',
+          marginBottom: '2rem',
+          textAlign: 'center',
+          boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+        }}>
+          <i className="fas fa-exclamation-triangle" style={{ marginRight: '10px' }}></i>
+          {error}
+          <div style={{ fontSize: '0.9rem', marginTop: '5px', opacity: 0.9 }}>
+            Mode: {process.env.REACT_APP_API_URL ? 'Connected to API' : 'Demo Mode'}
+          </div>
+        </div>
+      )}
+
       {/* Enhanced Hero Section */}
       <div className="hero-section" style={{
         background: 'linear-gradient(135deg, #3a86ff, #7209b7)',
@@ -182,6 +314,20 @@ const ProductsPage = () => {
         }}>
           Shop Now
         </button>
+        
+        {/* API Status Badge */}
+        <div style={{
+          position: 'absolute',
+          top: '20px',
+          right: '20px',
+          background: 'rgba(255,255,255,0.2)',
+          padding: '5px 15px',
+          borderRadius: '20px',
+          fontSize: '0.8rem',
+          backdropFilter: 'blur(5px)'
+        }}>
+          {process.env.REACT_APP_API_URL ? '🟢 Connected' : '🟡 Demo Mode'}
+        </div>
       </div>
 
       {/* Featured Products Section */}
@@ -201,8 +347,14 @@ const ProductsPage = () => {
           }}>Featured Products</h2>
           <span style={{
             color: '#666',
-            fontSize: '1rem'
-          }}>{products.length} products</span>
+            fontSize: '1rem',
+            background: '#f8f9fa',
+            padding: '5px 15px',
+            borderRadius: '20px',
+            border: '1px solid #e0e0e0'
+          }}>
+            {products.length} products available
+          </span>
         </div>
         <div className="products-grid">
           {products.map(product => (
@@ -212,45 +364,97 @@ const ProductsPage = () => {
       </div>
 
       {/* Stats Section */}
-      <div className="stats-section">
-        <div className="stat-item">
-          <i className="fas fa-shipping-fast stat-icon"></i>
-          <div className="stat-number">Free</div>
-          <div className="stat-label">Shipping</div>
-        </div>
-        <div className="stat-item">
-          <i className="fas fa-shield-alt stat-icon"></i>
-          <div className="stat-number">24/7</div>
-          <div className="stat-label">Support</div>
-        </div>
-        <div className="stat-item">
-          <i className="fas fa-undo-alt stat-icon"></i>
-          <div className="stat-number">30-Day</div>
-          <div className="stat-label">Returns</div>
-        </div>
-        <div className="stat-item">
-          <i className="fas fa-award stat-icon"></i>
-          <div className="stat-number">100%</div>
-          <div className="stat-label">Authentic</div>
-        </div>
+      <div className="stats-section" style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+        gap: '2rem',
+        margin: '3rem 0',
+        padding: '2rem',
+        background: 'linear-gradient(135deg, #3a86ff10, #7209b710)',
+        borderRadius: '15px'
+      }}>
+        {[
+          { icon: 'fas fa-shipping-fast', number: 'Free', label: 'Shipping', color: '#3a86ff' },
+          { icon: 'fas fa-shield-alt', number: '24/7', label: 'Support', color: '#4361ee' },
+          { icon: 'fas fa-undo-alt', number: '30-Day', label: 'Returns', color: '#4cc9f0' },
+          { icon: 'fas fa-award', number: '100%', label: 'Authentic', color: '#7209b7' }
+        ].map((stat, index) => (
+          <div key={index} className="stat-item" style={{
+            textAlign: 'center',
+            padding: '1.5rem'
+          }}>
+            <i className={`${stat.icon} stat-icon`} style={{
+              fontSize: '2.5rem',
+              color: stat.color,
+              marginBottom: '1rem'
+            }}></i>
+            <div className="stat-number" style={{
+              fontSize: '2rem',
+              fontWeight: 'bold',
+              color: stat.color,
+              marginBottom: '0.5rem'
+            }}>{stat.number}</div>
+            <div className="stat-label" style={{
+              color: '#666',
+              fontSize: '1rem'
+            }}>{stat.label}</div>
+          </div>
+        ))}
       </div>
 
       {/* Newsletter Section */}
-      <div className="newsletter-section">
+      <div className="newsletter-section" style={{
+        background: 'linear-gradient(135deg, #3a86ff, #7209b7)',
+        color: 'white',
+        padding: '3rem 2rem',
+        borderRadius: '15px',
+        textAlign: 'center',
+        margin: '3rem 0'
+      }}>
         <h2 style={{
           fontSize: '2rem',
-          background: 'linear-gradient(135deg, #3a86ff, #7209b7)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
           fontWeight: 'bold',
           marginBottom: '1rem'
         }}>Stay Updated</h2>
-        <p style={{ color: '#666', marginBottom: '1.5rem' }}>
+        <p style={{ opacity: '0.9', marginBottom: '1.5rem' }}>
           Subscribe to our newsletter for the latest products and exclusive offers
         </p>
-        <div className="newsletter-input">
-          <input type="email" placeholder="Enter your email address" />
-          <button>Subscribe</button>
+        <div className="newsletter-input" style={{
+          display: 'flex',
+          maxWidth: '500px',
+          margin: '0 auto'
+        }}>
+          <input 
+            type="email" 
+            placeholder="Enter your email address"
+            style={{
+              flex: '1',
+              padding: '1rem',
+              border: 'none',
+              borderRadius: '50px 0 0 50px',
+              fontSize: '1rem',
+              outline: 'none'
+            }}
+          />
+          <button style={{
+            background: 'white',
+            color: '#3a86ff',
+            border: 'none',
+            padding: '1rem 2rem',
+            borderRadius: '0 50px 50px 0',
+            fontSize: '1rem',
+            fontWeight: 'bold',
+            cursor: 'pointer',
+            transition: 'all 0.3s'
+          }}
+          onMouseOver={(e) => {
+            e.target.style.background = '#f8f9fa';
+          }}
+          onMouseOut={(e) => {
+            e.target.style.background = 'white';
+          }}>
+            Subscribe
+          </button>
         </div>
       </div>
 

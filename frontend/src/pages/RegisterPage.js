@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
-import axios from 'axios';
+import { userAPI } from '../services/api'; // Import from our new API service
 
 const RegisterPage = () => {
   const [loading, setLoading] = useState(false);
@@ -13,38 +13,71 @@ const RegisterPage = () => {
   const onSubmit = async (data) => {
     setLoading(true);
     try {
-      // In production: axios.post('/api/users/register', data)
-      // For now, simulate API call
-      console.log('Registering user:', data);
-      
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Store user in localStorage (temporary)
-      const users = JSON.parse(localStorage.getItem('nexusUsers') || '[]');
-      const userExists = users.find(user => user.email === data.email);
-      
-      if (userExists) {
-        toast.error('Email already registered!');
-        setLoading(false);
-        return;
+      // For development: fallback to localStorage if backend not available
+      if (process.env.NODE_ENV === 'development' && !process.env.REACT_APP_API_URL) {
+        // Simulate API delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Store user in localStorage (temporary)
+        const users = JSON.parse(localStorage.getItem('nexusUsers') || '[]');
+        const userExists = users.find(user => user.email === data.email);
+        
+        if (userExists) {
+          toast.error('Email already registered!');
+          setLoading(false);
+          return;
+        }
+        
+        const newUser = {
+          id: Date.now().toString(),
+          ...data,
+          role: 'customer',
+          createdAt: new Date().toISOString()
+        };
+        
+        users.push(newUser);
+        localStorage.setItem('nexusUsers', JSON.stringify(users));
+        
+        toast.success('Registration successful! Please login.');
+        navigate('/login');
+      } else {
+        // Production: Use actual API
+        console.log('Registering with API:', `${process.env.REACT_APP_API_URL}/api/users/register`);
+        
+        const response = await userAPI.register(data);
+        
+        if (response.data) {
+          toast.success('Registration successful! Please login.');
+          navigate('/login');
+        }
       }
-      
-      const newUser = {
-        id: Date.now().toString(),
-        ...data,
-        role: 'customer',
-        createdAt: new Date().toISOString()
-      };
-      
-      users.push(newUser);
-      localStorage.setItem('nexusUsers', JSON.stringify(users));
-      
-      toast.success('Registration successful! Please login.');
-      navigate('/login');
     } catch (error) {
-      toast.error('Registration failed. Please try again.');
       console.error('Registration error:', error);
+      
+      // Show appropriate error message
+      if (error.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else if (error.response?.data?.errors) {
+        // Handle validation errors
+        const errorMessage = error.response.data.errors[0]?.msg || 'Registration failed';
+        toast.error(errorMessage);
+      } else if (error.code === 'ERR_NETWORK') {
+        toast.error('Cannot connect to server. Please try again later.');
+        // Fallback to localStorage for demo
+        const users = JSON.parse(localStorage.getItem('nexusUsers') || '[]');
+        const newUser = {
+          id: Date.now().toString(),
+          ...data,
+          role: 'customer',
+          createdAt: new Date().toISOString()
+        };
+        users.push(newUser);
+        localStorage.setItem('nexusUsers', JSON.stringify(users));
+        toast.success('Registered locally (demo mode). Please login.');
+        navigate('/login');
+      } else {
+        toast.error('Registration failed. Please try again.');
+      }
     } finally {
       setLoading(false);
     }

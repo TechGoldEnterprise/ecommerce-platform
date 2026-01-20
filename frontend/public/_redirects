@@ -1,0 +1,5 @@
+# Netlify Redirects for SPA
+/*    /index.html    200
+
+# API Proxy (optional)
+/api/*  https://nexusshop-bhxb.onrender.com/api/:splat  200
